@@ -1,0 +1,11 @@
+{
+  "schema": "mg_insurance",
+  "table": "accountstatements",
+  "raw_path": "data",
+  "source_bucket": "mbk-nifi-landingzone",
+  "target_bucket": "mbk-datalake-common-prod",
+  "sync_type": "insert",
+  "audit_col": "updatedat",
+  "partition_col_name": "day",
+  "partition_col_src": "createdat"
+}

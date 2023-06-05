@@ -1,0 +1,14 @@
+Schema|mg_mobikwik
+Table|onboarding_request
+RawPath|data
+FinalPath|
+SourceBucket|mbk-nifi-landingzone
+TargetBucket|mbk-datalake-common-prod
+SyncType|CDC
+AuditCol|updated_at
+PartitionCol|day
+PrimaryKey|obj_id
+PartitionSrcCol|created_at
+TimestampCol|created_at,updated_at
+DecimalCol|
+ColLowerCase|Yes

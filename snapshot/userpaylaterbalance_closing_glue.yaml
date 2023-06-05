@@ -1,0 +1,33 @@
+schema: paylater
+table: userpaylaterbalance
+raw_path: data
+source_bucket: mbk-nifi-landingzone
+target_bucket: mbk-datalake-common-prod
+sync_type: snapshot
+audit_col: updatedat
+partition_col_name: day
+partition_col_src: createdat
+primary_key: paylaterid
+timestamp_col:
+  -balancelastupdatedat
+  -nextbilldate
+  -duedate
+  -accountactivationdate
+  -expirydate
+  -createdat
+  -updatedat
+  -unpaidduedate
+decimal_cols:
+  -sanctionedamount
+  -availableamount
+  -surplusamount
+  -billoutstandingamount
+  -paymentreceived
+  -penaltyreceived
+  -penaltythreat
+  -penaltycharged
+  -activationfee
+  -activationfeereceived
+  -lateinterestfeecharged	
+  -lateinterestfeereceived
+  -surplusamountv2

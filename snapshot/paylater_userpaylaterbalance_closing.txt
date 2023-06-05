@@ -1,0 +1,13 @@
+Schema|paylater
+Table|userpaylaterbalance_closing
+RawPath|data
+FinalPath|
+SourceBucket|mbk-nifi-landingzone
+TargetBucket|mbk-datalake-common-prod
+SyncType|Cdc
+AuditCol|UpdatedAt
+PartitionCol|day
+PartitionSrcCol|CreatedAt
+PrimaryKey|PaylaterId
+TimestampCol|BalanceLastUpdatedAt,NextBillDate,DueDate,AccountActivationDate,ExpiryDate,CreatedAt,UpdatedAt,UnPaidDueDate
+DecimalCol|SanctionedAmount,AvailableAmount,SurplusAmount,BillOutstandingAmount,PaymentReceived,PenaltyReceived,PenaltyThreat,PenaltyCharged,ActivationFee,ActivationFeeReceived,LateInterestFeeCharged,LateInterestFeeReceived,SurplusAmountV2

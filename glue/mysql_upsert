@@ -1,0 +1,45 @@
+def sync_cdc():
+    try:
+        final_data = check_for_data(table_dict['TargetBucket'],table_dict['Schema'], table_dict['Table'])
+        # final_data = check_df_size(target_path_dyf)
+        if not final_data:
+            sync_insert()
+            return None
+        dedupe = True
+        delta_day_double = read_source_data(dedupe)
+        if delta_day_double is None:
+            return None
+        new_day = delta_day_double.select('day').distinct().collect()
+        daily_table_partition_tracking(new_day)
+        output = [i[0] for i in new_day]
+        output = str(tuple(output)).rstrip(',)') + ')'
+        pushdownpredicate = "(day in " + str(output) + ")"
+        logger.info('Read Existing Data - New Day partition '+pushdownpredicate)
+        final_data = glueContext.create_dynamic_frame.from_catalog(database=table_dict['Schema'],
+                                                                   table_name=table_dict['Table'],
+                                                                   push_down_predicate=pushdownpredicate).toDF()
+        logger.info('Read Existing Data Complete')
+        if not final_data.rdd.isEmpty():
+            logger.info('Data Merge Started')
+            #merged_data = final_data.join(delta_day_double, pk_list, "left_anti").union(delta_day_double)
+            #custom union
+            old_data = final_data.join(delta_day_double, pk_list, "left_anti")
+            if(table_dict.get('ColLowerCase')=='Yes'):
+                old_data=old_data.toDF(*[c.lower() for c in old_data.columns])
+                delta_day_double=delta_day_double.toDF(*[c.lower() for c in delta_day_double.columns])
+            merged_data = customUnion(old_data,delta_day_double)
+            logger.info('Data Merge Completed')
+        else:
+            merged_data = delta_day_double
+        logger.info('Write Final Data Started')
+        merged_data.repartition(table_dict['PartitionCol']).write.mode('overwrite').format('parquet').partitionBy(
+            table_dict['PartitionCol']).save(target_path)
+        logger.info('Write Final Data completed')
+        # execution = athena_query(athenaClient, query_string)
+        #s3_file_delete(table_dict['SourceBucket'],
+        #               table_dict['RawPath'] + "/" + table_dict['Schema'] + "/" + table_dict['Table'])
+        glueContext.purge_s3_path(source_path,{"retentionPeriod":0})
+    except Exception as e:
+        raise e
+        logger.info(e)
+        print('sync_cdc failed')

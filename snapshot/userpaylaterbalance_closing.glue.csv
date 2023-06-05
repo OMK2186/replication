@@ -1,0 +1,39 @@
+schema|paylater
+table|userpaylaterbalance_closing
+raw_path|data
+source_bucket|mbk-nifi-landingzone
+target_bucket|mbk-datalake-common-prod
+sync_type|snapshot
+audit_col|updatedat
+partition_col_name|day
+partition_col_src|createdat
+primary_key|paylaterid
+timestamp_cols|balancelastupdatedat,nextbilldate,duedate,accountactivationdate,expirydate,createdat,updatedat,unpaidduedate
+decimal_cols|sanctionedamount,availableamount,surplusamount,billoutstandingamount,paymentreceived,penaltyreceived,penaltythreat,penaltycharged,activationfee,activationfeereceived,lateinterestfeecharged,lateinterestfeereceived,surplusamountv2
+temp_schema|mobikwik_schema
+temp_table|kk_dnd_userpaylaterbalance_closing
+
+
+
+
+s3://mbk-nifi-landingzone/replication_v2/configs/paylater/userpaylaterbalance_closing.glue.csv
+
+
+desc paylater.userpaylaterbalance
+
+
+
+
+aws glue start-job-run --job-name rep_mbk_snapshot --arguments {"--table_metafile": "s3://mbk-nifi-landingzone/replication_v2/configs/paylater/userpaylaterbalance_closing.glue.csv", "--d_day":"20230302", "--y_day":"20230301"}
+
+
+
+d='{"--table_metafile": "s3://mbk-nifi-landingzone/replication_v2/configs/paylater/userpaylaterbalance_closing.glue.csv", "--d_day":"20230302", "--y_day":"20230301"}'
+
+
+--table_metafile s3://mbk-nifi-landingzone/replication_v2/configs/paylater/userpaylaterbalance_closing.glue.csv
+--d_day 20230302
+--y_day 20230301
+
+
+userpaylaterbalance_closing

@@ -1,0 +1,11 @@
+{
+  "schema": "pg_merchant",
+  "table": "accountstatements",
+  "raw_path": "data",
+  "source_bucket": "mbk-nifi-landingzone",
+  "target_bucket": "mbk-datalake-common-prod",
+  "sync_type": "fullload",
+  "audit_col": null,
+  "partition_col_name": "day",
+  "partition_col_src": "createdat"
+}

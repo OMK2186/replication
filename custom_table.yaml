@@ -1,0 +1,32 @@
+engine:
+    mysql
+schema:
+    altce
+table:
+    allindiastatecodedata
+rawpath:
+    data    
+src_bucket:
+    mbk-nifi-landingzone
+target_bucket:
+    mbk-datalake-common-prod
+sync_type:
+    full
+audit_col:
+    last_updated_at
+part_col_src:
+    created_at
+primary_keys:
+    id
+
+
+#'s3://mbk-datalake-common-prod/email_db/token_data_1'
+
+# aws glue start-job-run --job-name mbk_transform_updated --arguments {\"$param1\":\"$GlueParam\"} | jq '.JobRunId' | sed 's/"//g')
+
+#args = getResolvedOptions(sys.argv,['JOB_NAME','table_metafile'])
+
+
+#token_data_replication
+
+#aws glue start-job-run --job-name token_data_replication

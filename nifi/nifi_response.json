@@ -1,0 +1,192 @@
+{
+  "revision": {
+    "clientId": "b9118b51-0185-1000-a982-ad165d46b1df",
+    "version": 8
+  },
+  "id": "b91fe430-0185-1000-3cbe-5a53bd215eac",
+  "uri": "https://nifi.analytics.mbkinternal.in:443/nifi-api/processors/b91fe430-0185-1000-3cbe-5a53bd215eac",
+  "position": {
+    "x": 456,
+    "y": 400
+  },
+  "permissions": {
+    "canRead": true,
+    "canWrite": true
+  },
+  "bulletins": [],
+  "component": {
+    "id": "b91fe430-0185-1000-3cbe-5a53bd215eac",
+    "parentGroupId": "b9128b6b-0185-1000-31bc-3e29dcc463d1",
+    "position": {
+      "x": 456,
+      "y": 400
+    },
+    "name": "EndNode",
+    "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+    "bundle": {
+      "group": "org.apache.nifi",
+      "artifact": "nifi-update-attribute-nar",
+      "version": "1.12.1"
+    },
+    "state": "STOPPED",
+    "style": {},
+    "relationships": [
+      {
+        "name": "set state fail",
+        "description": "A failure to set the state after adding the attributes to the FlowFile will route the FlowFile here.",
+        "autoTerminate": true
+      },
+      {
+        "name": "success",
+        "description": "All successful FlowFiles are routed to this relationship",
+        "autoTerminate": true
+      }
+    ],
+    "supportsParallelProcessing": true,
+    "supportsEventDriven": true,
+    "supportsBatching": true,
+    "persistsState": true,
+    "restricted": false,
+    "deprecated": false,
+    "executionNodeRestricted": false,
+    "multipleVersionsAvailable": false,
+    "inputRequirement": "INPUT_REQUIRED",
+    "config": {
+      "properties": {
+        "Delete Attributes Expression": null,
+        "Store State": "Store state locally",
+        "Stateful Variables Initial Value": "0",
+        "canonical-value-lookup-cache-size": "100",
+        "last_tms": "${now()}"
+      },
+      "descriptors": {
+        "Delete Attributes Expression": {
+          "name": "Delete Attributes Expression",
+          "displayName": "Delete Attributes Expression",
+          "description": "Regular expression for attributes to be deleted from FlowFiles.  Existing attributes that match will be deleted regardless of whether they are updated by this processor.",
+          "required": false,
+          "sensitive": false,
+          "dynamic": false,
+          "supportsEl": true,
+          "expressionLanguageScope": "Variable Registry and FlowFile Attributes"
+        },
+        "Store State": {
+          "name": "Store State",
+          "displayName": "Store State",
+          "description": "Select whether or not state will be stored. Selecting 'Stateless' will offer the default functionality of purely updating the attributes on a FlowFile in a stateless manner. Selecting a stateful option will not only store the attributes on the FlowFile but also in the Processors state. See the 'Stateful Usage' topic of the 'Additional Details' section of this processor's documentation for more information",
+          "defaultValue": "Do not store state",
+          "allowableValues": [
+            {
+              "allowableValue": {
+                "displayName": "Do not store state",
+                "value": "Do not store state"
+              },
+              "canRead": true
+            },
+            {
+              "allowableValue": {
+                "displayName": "Store state locally",
+                "value": "Store state locally"
+              },
+              "canRead": true
+            }
+          ],
+          "required": true,
+          "sensitive": false,
+          "dynamic": false,
+          "supportsEl": false,
+          "expressionLanguageScope": "Not Supported"
+        },
+        "Stateful Variables Initial Value": {
+          "name": "Stateful Variables Initial Value",
+          "displayName": "Stateful Variables Initial Value",
+          "description": "If using state to set/reference variables then this value is used to set the initial value of the stateful variable. This will only be used in the @OnScheduled method when state does not contain a value for the variable. This is required if running statefully but can be empty if needed.",
+          "required": false,
+          "sensitive": false,
+          "dynamic": false,
+          "supportsEl": false,
+          "expressionLanguageScope": "Not Supported"
+        },
+        "canonical-value-lookup-cache-size": {
+          "name": "canonical-value-lookup-cache-size",
+          "displayName": "Cache Value Lookup Cache Size",
+          "description": "Specifies how many canonical lookup values should be stored in the cache",
+          "defaultValue": "100",
+          "required": true,
+          "sensitive": false,
+          "dynamic": false,
+          "supportsEl": false,
+          "expressionLanguageScope": "Not Supported"
+        },
+        "last_tms": {
+          "name": "last_tms",
+          "displayName": "last_tms",
+          "description": "",
+          "required": false,
+          "sensitive": false,
+          "dynamic": true,
+          "supportsEl": true,
+          "expressionLanguageScope": "Variable Registry and FlowFile Attributes"
+        }
+      },
+      "schedulingPeriod": "0 sec",
+      "schedulingStrategy": "TIMER_DRIVEN",
+      "executionNode": "ALL",
+      "penaltyDuration": "30 sec",
+      "yieldDuration": "1 sec",
+      "bulletinLevel": "WARN",
+      "runDurationMillis": 0,
+      "concurrentlySchedulableTaskCount": 1,
+      "comments": "",
+      "customUiUrl": "/nifi-update-attribute-ui-1.12.1/configure",
+      "lossTolerant": false,
+      "defaultConcurrentTasks": {
+        "TIMER_DRIVEN": "1",
+        "EVENT_DRIVEN": "0",
+        "CRON_DRIVEN": "1"
+      },
+      "defaultSchedulingPeriod": {
+        "TIMER_DRIVEN": "0 sec",
+        "CRON_DRIVEN": "* * * * * ?"
+      }
+    },
+    "validationStatus": "VALID",
+    "extensionMissing": false
+  },
+  "inputRequirement": "INPUT_REQUIRED",
+  "status": {
+    "groupId": "b9128b6b-0185-1000-31bc-3e29dcc463d1",
+    "id": "b91fe430-0185-1000-3cbe-5a53bd215eac",
+    "name": "EndNode",
+    "runStatus": "Stopped",
+    "statsLastRefreshed": "12:11:00 IST",
+    "aggregateSnapshot": {
+      "id": "b91fe430-0185-1000-3cbe-5a53bd215eac",
+      "groupId": "b9128b6b-0185-1000-31bc-3e29dcc463d1",
+      "name": "EndNode",
+      "type": "UpdateAttribute",
+      "runStatus": "Stopped",
+      "executionNode": "ALL",
+      "bytesRead": 0,
+      "bytesWritten": 0,
+      "read": "0 bytes",
+      "written": "0 bytes",
+      "flowFilesIn": 0,
+      "bytesIn": 0,
+      "input": "0 (0 bytes)",
+      "flowFilesOut": 0,
+      "bytesOut": 0,
+      "output": "0 (0 bytes)",
+      "taskCount": 0,
+      "tasksDurationNanos": 0,
+      "tasks": "0",
+      "tasksDuration": "00:00:00.000",
+      "activeThreadCount": 0,
+      "terminatedThreadCount": 0
+    }
+  },
+  "operatePermissions": {
+    "canRead": true,
+    "canWrite": true
+  }
+}
