@@ -12,3 +12,7 @@ PartitionSrcCol|created_at
 TimestampCol|created_at,updated_at
 DecimalCol|
 ColLowerCase|Yes
+
+
+
+sh /apps/nifi/glue_job_run.sh s3://mbk-nifi-landingzone/Glue/mg_mobikwik_kyc_data.txt mg_mobikwik kyc_data

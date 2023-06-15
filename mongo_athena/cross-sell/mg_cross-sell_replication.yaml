@@ -1,0 +1,41 @@
+mongo_host: "10.10.150.147"
+mongo_port: 27017
+mongo_db: "cross-sell"
+mongo_user: "analytics-app"
+mongo_pass: "Analytics@890#31090"
+
+##mongo --port 27017 -u analytics-app -p'Analytics@890#31090' --authenticationDatabase 'cross-sell' --host 10.10.150.147
+
+#Load types - [CDC, FULL, INCREMENTAL, ADHOC]
+
+#audit_col is null in case of FULL load, in case of INCREMENTAL it will be created_at*, CDC->updated_at*
+#partition_col will be null if not partitioned, if there is created_at, it will date(created_at,'YYYYMMDD') format will be used
+
+dag: 'mg_cross-sell_replication'
+
+#src_db_af_conn_id: 'pgsql_150.24_merchant'
+
+landing_bucket: 'mbk-nifi-landingzone' # Add this to particular table if you want to use diff landing_bucket for that table
+data_path: 'data' # In this table extracted data will be stored. Add this to particular table if you want to use diff data_path for that table.
+max_delta: 'maxdelta' #Location to store max_delta till which data has been extracted, This shoul be updated in metadata file
+columns: '*' #column list in table if only particular columns needs to be extracted eg. columns:'memberid, txnid, createdat .. '
+where: '1=1' #TODO check if this is necessary
+
+#Config to be used for Glue Job
+#glue_param_path:  's3://mbk-nifi-landingzone/Glue/' # not needed, will pass as a parameter directly
+glue_job_name: '' #Common Glue job, If other job needs to be used, add in table params
+target_bucket: 'mbk-datalake-common-prod'
+
+
+tables:
+    - mg_cross-sell_policy:
+        src_db_name: 'cross-sell'
+        src_table_name: 'policy'
+        load_type: 'CDC'
+        audit_col : 'lastModified'
+        target_db_name: 'mg_cross-sell'
+        target_table_name: 'policy'
+        primary_keys: 'obj_id' #Comma separated values
+        partition_col: 'day'
+        partition_src_col: 'created_at'
+        min_date: "2018-01-01"

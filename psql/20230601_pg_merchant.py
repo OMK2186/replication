@@ -26,6 +26,8 @@ import boto3
 import uuid
 from pyathena import connect
 
+# @author ketankk
+
 s3_staging_dir = "s3://mbk-athena-temp/Unsaved/replication"
 region_name = "ap-south-1"
 boto3.setup_default_session(region_name=region_name)
@@ -104,28 +106,24 @@ def fetch_data(ex_query, src_table_name, columns, audit_col, max_time, curr_time
 
 
 # Default LIMIT is 200000, table specific LIMIT can be passed in parameter
-
-def fetch_full_data(pgsql_merchant_conn, src_db_name, src_table_name, columns, p_keys, s3_out_loc, LIMIT=200000):
-    pgsql_hook = PostgresHook(postgres_conn_id=pgsql_merchant_conn, schema=src_db_name)
+def fetch_full_data2(pgsql_merchant_conn, src_db_name, src_table_name, columns, p_keys, s3_out_loc, CHUNKSIZE=200000):
+    '''  pgsql_merchant = PostgresHook(postgres_conn_id=pgsql_merchant_conn, schema=src_db_name)#.get_sqlalchemy_engine()
 
     count_query = f"select count(*) as total_count from {src_table_name}"
     total_count = pgsql_hook.get_pandas_df(sql=count_query)['total_count'][0]
     log.info(f"Total count is: {total_count}")
 
- #   batch_size = total_count / LIMIT
- #   batch_num = 0
-#    OFFSET = 0
+    #   batch_size = total_count / LIMIT
+    #   batch_num = 0
+    #    OFFSET = 0
 
-
-    engine = pgsql_hook.get_sqlalchemy_engine(self.get_uri())
+    engine = pgsql_hook
     conn = engine.connect().execution_options(stream_results=True)
     import pandas.io.sql as psql
 
-    while True:
-        if (batch_num > batch_size):
-            break
-        ex_query = f"select {columns} from {src_table_name} ORDER BY {p_keys} OFFSET {OFFSET} LIMIT {LIMIT}"
-        data = pgsql_hook.get_pandas_df(sql=ex_query, chunksize=LIMIT)
+    ext_query = f"select {columns} from {src_table_name} ORDER BY {p_keys} OFFSET {OFFSET} LIMIT {LIMIT}"
+
+    for data_df in psql.read_sql(ext_query, con=conn, chunksize=LIMIT):
         for df in psql.read_sql(query1, con=conn, chunksize=200000):
             print(i)
             i = i + 1
@@ -140,6 +138,29 @@ def fetch_full_data(pgsql_merchant_conn, src_db_name, src_table_name, columns, p
 
         OFFSET = OFFSET + LIMIT
         batch_num = batch_num + 1
+        '''
+
+
+def fetch_full_data(pgsql_merchant_conn, src_db_name, src_table_name, columns, p_keys, s3_out_loc, CHUNKSIZE=200000):
+    pgsql_merchant = PostgresHook(postgres_conn_id=pgsql_merchant_conn, schema=src_db_name).get_sqlalchemy_engine()
+
+    # Using stream_results=True to keep cursor at server side
+    # Reference https://github.com/pandas-dev/pandas/issues/12265
+
+    conn = pgsql_merchant.connect().execution_options(stream_results=True)
+    import pandas.io.sql as psql
+
+    ext_query = f"select {columns} from {src_table_name}"
+    log.info(f"Running query: {ext_query}")
+
+    for data_df in psql.read_sql(ext_query, con=conn, chunksize=CHUNKSIZE):
+        uid = str(uuid.uuid1())
+        log.info(f"Data fetched: {data_df.shape}")
+
+        file_path = f"{s3_out_loc}/{uid}.parquet"
+        log.info(f"Writing data to {file_path}")
+
+        data_df.to_parquet(file_path, index=False)
 
 
 def extract_load_data(params, ds):
@@ -169,12 +190,12 @@ def extract_load_data(params, ds):
         ex_query = "select {columns} from {table} "
         # fetch_full_data(src_db_name, src_table_name, columns, primary_keys):
         fetch_full_data(pgsql_merchant_conn, src_db_name, src_table_name, columns, primary_keys, s3_out_loc,
-                        LIMIT=200000)
+                        CHUNKSIZE=200000)
 
         # TODO
     elif load_type == 'CDC':
         ex_query = "select {columns} from {table}  where {audit_col} >='{st_date}' and {audit_col} <'{end_date}'"
-        max_time = get_max_delta(landing_bucket, max_delta, tgt_db, tgt_table)
+        #max_time = get_max_delta(landing_bucket, max_delta, target_db_name, tgt_table)
     elif load_type == 'INCREMENTAL':
         ex_query = "select {columns} from {table}  where {audit_col} >='{st_date}' and {audit_col} <'{end_date}'"
     else:

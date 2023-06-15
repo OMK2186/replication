@@ -64,9 +64,25 @@ def get_mongo_connection():
 
 def get_mongo_data():
     _coll=get_mongo_connection()
-    mongo_data=_coll.find()
+    query={'updatedAt':{'$gte':datetime(2023, 4, 21)}}
+    
+    mongo_data=_coll.find(query)
     df=pd.DataFrame(mongo_data)
     print("data fetched")
+    return df
+
+
+
+def fetch_data(audit_col, start_day, end_day):
+    _coll=get_mongo_connection()
+    query={"$match":{audit_col:{"$gte":start_day, "$lt":end_day}}}
+    pipeline=[query]
+    mongo_data=_coll.aggregate(pipeline)
+    arr=[]
+    for data in mongo_data:
+        arr.append(data)
+    df=pd.DataFrame(arr)
+    #df=pd.DataFrame(mongo_data)
     return df
 
 def extract_data(ds):
@@ -88,7 +104,7 @@ def extract_data(ds):
 
 
 
-def extract():
+def extract_data():
     print('ex')
  
 

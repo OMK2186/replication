@@ -158,7 +158,7 @@ dag = DAG(
     schedule_interval='20 9 * * *',
     start_date=datetime(2018,1,1,tzinfo=local_tz),
     dagrun_timeout=timedelta(minutes=120),
-    tags=['dataengg','mongo','athena','replication','insurance',''],
+    tags=['dataengg', 'mongo', 'athena', 'replication', 'insurance', 'epfoUserEmploymentData', 'accountstatement', 'accountTransactions'],
     catchup=False
     )
 
@@ -187,17 +187,6 @@ for table in table_list:
     glue_job >> end
 
 
-glue_load_refresh_data = BashOperator(
-        task_id='glue_load_refresh_data',
-        bash_command="sh /apps/nifi/glue_job_run.sh s3://mbk-nifi-landingzone/Glue/mg_mobikwik_onboarding_request.txt mg_mobikwik onboarding_request ",
-        dag=dag
-    )
-
-#sh /apps/nifi/glue_job_run.sh s3://mbk-nifi-landingzone/Glue/mg_mobikwik_onboarding_request.txt mg_mobikwik onboarding_request
-
-
-
-extract_mongo_data>>glue_load_refresh_data
 
 if __name__ == "__main__":
     dag.cli()
