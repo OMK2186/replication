@@ -116,11 +116,18 @@ athena_conn = connect(s3_staging_dir=s3_staging_dir, region_name=region_name)
 
 glue_client = boto3.client('glue', region_name="ap-south-1")
 
+double_col_list = ["amount_paid"]
+ts_col_list = ["booked_at", "debited_at", "created_at", "last_modified"]
+params = {'double_col_list': double_col_list, 'ts_col_list': ts_col_list}
+
 
 
 def trigger_glue_job(day):
-  job_name='rep_mbk_snapshot'
-  args={'--type':'1', '--y_day': '20230401', '--d_day':  day, '--table_metafile':  metafile}
+  #job_name='rep_mbk_snapshot'
+  #args={'--type':'1', '--y_day': '20230401', '--d_day':  day, '--table_metafile':  metafile}
+  job_name = 'pg_merchant_tmp2'
+  #args = {'--params':  params\'}
+  args={}
   print(args)
   response = glue_client.start_job_run(JobName = job_name, Arguments = args)
   print(response)
@@ -131,9 +138,7 @@ def check_status(job_name, run_id):
   while True:
     status_response = glue_client.get_job_run(JobName=GLUE_JOB_NAME, RunId=run_id)
     run_status=status_response['JobRun']['JobRunState']
-    
     print(f'Job status: {run_status}')
-    
     if run_status in ['SUCCEEDED', 'FAILED', 'ERROR', 'TIMEOUT', 'STOPPED']:
         break
     if run_status in ['RUNNING', 'WAITING', 'STOPPING', 'STARTING']:
@@ -141,7 +146,6 @@ def check_status(job_name, run_id):
     else:
         print(f'Unknown state: {run_status}')
         break
-    
   return run_status
 
 

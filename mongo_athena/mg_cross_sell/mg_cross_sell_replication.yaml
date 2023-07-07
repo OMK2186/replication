@@ -28,14 +28,25 @@ target_bucket: 'mbk-datalake-common-prod'
 
 
 tables:
-    - mg_cross-sell_policy:
+    - mg_cross_sell_policy:
         src_db_name: 'cross-sell'
         src_table_name: 'policy'
         load_type: 'CDC'
         audit_col : 'lastModified'
-        target_db_name: 'mg_cross-sell'
+        target_db_name: 'mg_cross_sell'
         target_table_name: 'policy'
         primary_keys: 'obj_id' #Comma separated values
         partition_col: 'day'
-        partition_src_col: 'created_at'
-        min_date: "2018-01-01"
+        partition_src_col: 'createdAt'
+    - mg_cross_sell_policy2:
+        src_db_name: 'cross-sell'
+        src_table_name: 'policy'
+        load_type: 'CDC'
+        audit_col : 'lastModified'
+        target_db_name: 'mg_cross_sell'
+        target_table_name: 'policy2'
+        primary_keys: 'obj_id' #Comma separated values
+        partition_col: 'day'
+        partition_src_col: 'createdAt'
+~                                                                                                                                                                                                                                                             
+~

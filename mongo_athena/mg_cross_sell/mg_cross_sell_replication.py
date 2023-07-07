@@ -12,8 +12,92 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from pymongo import MongoClient
 
-
 # mongo_athena_mobikwik_kyc_data.py
+# Sample JSON
+'''
+{
+  "_id": "POLMBK7DDGH4C0E",
+  "_class": "com.mobikwik.crosssell.insurance.policy.entities.PolicyEntity",
+  "insuranceId": "INSE0D668J30H205F",
+  "memberId": "9804526853@nocash.mobikwik.com",
+  "primaryCell": "9804526853",
+  "walletTransactionId": "586848618",
+  "crossSell": false,
+  "client": "android",
+  "ip": "42.110.148.13",
+  "insuranceSellPlatform": "ADD_MONEY_CROSS_SELL",
+  "insurer": "ONEASSIST",
+  "status": "PURCHASED",
+  "insuranceCategory": "WALLET_PROTECT",
+  "amountPaid": 79,
+  "sumAssured": "150000",
+  "sumAssuredUnit": "",
+  "userAppDetails": {
+    "userClientType": "Android",
+    "subClientType": "Invalid",
+    "appVersion": "1490"
+  },
+  "tenureInMonths": 1,
+  "masterPolicyNo": "",
+  "masterCode": "",
+  "kyc": false,
+  "bookedAt": "2020-10-29T08:53:44.805Z",
+  "debitedAt": "2020-10-29T08:53:21.701Z",
+  "validFrom": "2020-10-28T18:30:00Z",
+  "validUpto": "2020-11-28T18:29:59.999Z",
+  "policyDispatchTime": "2020-10-29T08:53:44.808Z",
+  "policyDocUrl": "https://promotions.mobikwik.com/inapp/terms-and-conditions/wallet-assist/files/wallet-assist-tnc.pdf",
+  "policyref": "1007925644",
+  "customerDetails": {
+    "kycType": "E-aadhaar xml Kyc",
+    "name": "Abhishek Kumar Singh",
+    "gender": "Male",
+    "genderE": "MALE",
+    "dob": "3*-0*-1**5",
+    "email": "98****6853@nocash.mobikwik.com",
+    "mobile": "9***5268**",
+    "address": "BHARPARA ROAD 34/35 Haora (M.Corp) Howrah West Bengal 711103",
+    "state": "West Bengal",
+    "pincode": "711103",
+    "nomineeName": "",
+    "nomineeAge": "",
+    "nomineeGender": "",
+    "nomineeRelationship": "",
+    "additionalInfo": {}
+  },
+  "wapgTxnInfo": {
+    "pgStatus": false,
+    "pgAmount": 0,
+    "agId": "INS-POLMBK7DDGH4C0E"
+  },
+  "policyIconUrl": "https://static.mobikwik.com/appdata/revamp/insurance/oneassist-wp-policyIcon.png",
+  "responseType": "INCOMPLETE_DETAILS",
+  "sent": true,
+  "purchaseResponse": {
+    "customerId": "11836001",
+    "memUUID": "1a0e45f0-6243-475a-a92d-566002324ef6",
+    "message": "CUSTOMER_CREATED_SUCCESSFULLY",
+    "code": "success"
+  },
+  "autoRenew": false,
+  "autoPurchase": false,
+  "userChoseToSkipNominee": false,
+  "userCrossSellRandomizationId": "5f5e4172c9e77c003983f669",
+  "notificationData": {
+    "smsCount": 0,
+    "appNotificationCount": 0,
+    "whatsAppNotificationCount": 0,
+    "totalNotifications": 0,
+    "notificationRecords": []
+  },
+  "errorDetailsList": [],
+  "formVersion": "Old Form",
+  "source": "API",
+  "version": 8,
+  "createdAt": "2020-10-29T08:53:21.245Z",
+  "lastModified": "2020-10-29T08:53:44.808Z"
+}
+'''
 
 
 def get_mongo_connection(_mongo_host, _mongo_db, _mongo_port, _mongo_user, _mongo_password):
@@ -33,21 +117,45 @@ def get_mongo_connection(_mongo_host, _mongo_db, _mongo_port, _mongo_user, _mong
 
 def save_data(df, s3_loc):
     uq_id = str(uuid.uuid4())
+
     landing_data_path = f"{s3_loc}/{uq_id}.parquet"
     print(f"landing_data_path: {landing_data_path}")
+    # TODO CHECK engine here
+    #df.to_parquet(landing_data_path, index=False, engine='fastparquet')
     df.to_parquet(landing_data_path, index=False)
 
 
 def data_prep(df):
-    df['updated_at'].fillna('2001-01-01', inplace=True)
-    df['created_at'].fillna('2001-01-01', inplace=True)
-    # TODO Changes required here;
-    # Removing Millisecs from datetime
-    df['updated_at'] = df['updated_at'].astype('datetime64[s]').astype('str')
-    df['created_at'] = df['created_at'].astype('datetime64[s]').astype('str')
-    df['obj_id'] = df['obj_id'].astype('str')
-    # df.drop('_id', axis=1, inplace=True)
+    # df['updated_at'].fillna('2001-01-01', inplace=True)
+    # df['created_at'].fillna('2001-01-01', inplace=True)
+    ## TODO Changes required here;
+    ## Removing Millisecs from datetime
+    # df['updated_at'] = df['updated_at'].astype('datetime64[s]').astype('str')
+    # df['created_at'] = df['created_at'].astype('datetime64[s]').astype('str')
+    # df['obj_id'] = df['obj_id'].astype('str')
+    ## df.drop('_id', axis=1, inplace=True)
+
+    '''
+    df['debited_at'] = df.debited_at.astype(str).where(df.debited_at.notnull(), None)
+    df['booked_at'] = df.booked_at.astype(datetime).where(df.booked_at.notnull(), None)
+    df['booked_at'] = df.booked_at.where(df.booked_at.notnull(), None)
+    df['valid_from'] = df.valid_from.astype(str).where(df.valid_from.notnull(), None)
+    df['valid_upto'] = df.valid_upto.astype(str).where(df.valid_upto.notnull(), None)
+    '''
+
+    df['debited_at'] = df.debited_at.astype("datetime64[s]").where(df.debited_at.notnull(), None)
+    df['booked_at'] = df.booked_at.astype("datetime64[s]").where(df.booked_at.notnull(), None)
+    df['valid_from'] = df.valid_from.astype("datetime64[s]").where(df.valid_from.notnull(), None)
+    df['valid_upto'] = df.valid_upto.astype("datetime64[s]").where(df.valid_upto.notnull(), None)
+    '''
+    df['debited_at'] = pd.to_datetime(df['debited_at'])
+    df['booked_at'] = pd.to_datetime(df['booked_at'])
+    df['valid_from'] = pd.to_datetime(df['valid_from'])
+    df['valid_upto'] = pd.to_datetime(df['valid_upto'])
+    '''
+
     return df
+# to_pandas(timestamp96=['inserted2'])
 
 
 def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
@@ -65,6 +173,50 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
         "created_at": "$createdAt",
         "last_modified": "$lastModified"}}
 
+    proj = {"$project": {
+        "obj_id": "$_id",
+        "member_id": "$memberId",
+        "insurance_category": "$insuranceCategory",
+        "insurance_sell_platform": "$insuranceSellPlatform",
+        "insurer": "$insurer",
+        "amount_paid": "$amountPaid",
+        "cross_sell": "$crossSell",
+        "booked_at": "$bookedAt",  ##**
+        "status": "$status",
+        "sum_assured": "$sumAssured",
+        "tenure_months": "$tenureInMonths",
+        "policy_ref": "$policyref",
+        "customer_state": "$customerDetails.state",
+        "customer_pincode": "$customerDetails.pincode",
+        "valid_from": "$validFrom",
+        "valid_upto": "$validUpto",
+        "debited_at": "$debitedAt",
+        "created_at": "$createdAt",
+        "last_modified": "$lastModified"}}
+    # Creating DF with prdefined column names to handle blank data
+
+    cols = ['obj_id', 'member_id', 'insurance_category', 'insurance_sell_platform', 'insurer', 'amount_paid',
+            'cross_sell', 'booked_at', 'debited_at', 'created_at', 'last_modified']
+    cols = {'obj_id': pd.Series(dtype='str'),
+            'member_id': pd.Series(dtype='str'),
+            'insurance_category': pd.Series(dtype='str'),
+            'insurance_sell_platform': pd.Series(dtype='str'),
+            'insurer': pd.Series(dtype='str'),
+            'amount_paid': pd.Series(dtype='float64'),
+            'cross_sell': pd.Series(dtype='bool'),
+            'booked_at': pd.Series(dtype='datetime64[ns]'),
+            'status': pd.Series(dtype='str'),
+            'sum_assured': pd.Series(dtype='str'),
+            'tenure_months': pd.Series(dtype='int'),
+            'policy_ref': pd.Series(dtype='str'),
+            'customer_state': pd.Series(dtype='str'),
+            'customer_pincode': pd.Series(dtype='int'),
+            'valid_from': pd.Series(dtype='datetime64[ns]'),
+            'valid_upto': pd.Series(dtype='datetime64[ns]'),
+            'debited_at': pd.Series(dtype='datetime64[ns]'),
+            'created_at': pd.Series(dtype='datetime64[ns]'),
+            'last_modified': pd.Series(dtype='datetime64[ns]')}
+
     # TODO
     if load_type == 'FULL':
         print(f"Load type: {load_type}")
@@ -72,10 +224,15 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
     # TODO check max, current etcs
     elif load_type == 'CDC':
         # max_time = get_max_delta(landing_bucket, max_delta, target_db_name, tgt_table)
-        max_time = datetime.now() - timedelta(days=10)  # TODO change this
+        ##max_time = datetime.now() - timedelta(days=10)  # TODO change this
+        max_time = datetime(2023, 4, 1)  # - timedelta(days=10)  # TODO change this
         # If data has not been updated for long time, then take date till which data has been updated
         start_day = min(exec_day, max_time) - timedelta(days=5)
-        end_day = exec_day + timedelta(days=1)
+        start_day = exec_day - timedelta(days=10)
+        end_day = exec_day  # max_time + timedelta(days=100)
+    #        end_day = max_time + timedelta(days=100)
+
+    # TODO
 
     elif load_type == 'INCREMENTAL':
         print(f"Load type: {load_type}")
@@ -92,12 +249,15 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
         arr = []
         for data in mongo_data:
             arr.append(data)
-        df = pd.DataFrame(arr)
+        df = pd.DataFrame(arr, columns=cols)
         print(f"Data Extracted for sd:{sd}, ed:{ed}, Row count is {df.shape[0]}")
         # TODO Check this df = data_prep(df)
-        save_data(df, s3_loc)
+        if not df.empty:
+            df = data_prep(df)
+            save_data(df, s3_loc)
         sd = ed
         ed = ed + timedelta(days=1)
+
 
 # TODO
 def get_max_time(target_db_name, target_table_name):
@@ -170,7 +330,7 @@ args = {
 local_tz = pendulum.timezone("Asia/Kolkata")
 
 dag = DAG(
-    dag_id='mg_cross-sell_replication',
+    dag_id='mg_cross_sell_replication',
     default_args=args,
     schedule_interval='55 6 * * *',
     start_date=datetime(2023, 1, 1, tzinfo=local_tz),
@@ -226,7 +386,7 @@ def extract_data_task(task_name, params, pool):
 import yaml
 from copy import deepcopy
 
-with open('/apps/cron/aws_replication/metadata/mg_cross-sell_replication.yaml') as f:
+with open('/apps/cron/aws_replication/metadata/mg_cross_sell_replication.yaml') as f:
     configFile = yaml.safe_load(f)
     # TODO delete this
     print(configFile)
