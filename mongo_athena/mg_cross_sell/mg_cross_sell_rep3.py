@@ -121,21 +121,40 @@ def save_data(df, s3_loc):
     landing_data_path = f"{s3_loc}/{uq_id}.parquet"
     print(f"landing_data_path: {landing_data_path}")
     # TODO CHECK engine here
-    # df.to_parquet(landing_data_path, index=False, engine='fastparquet')
+    #df.to_parquet(landing_data_path, index=False, engine='fastparquet')
     df.to_parquet(landing_data_path, index=False)
 
 
 def data_prep(df):
+    # df['updated_at'].fillna('2001-01-01', inplace=True)
+    # df['created_at'].fillna('2001-01-01', inplace=True)
+    ## TODO Changes required here;
+    ## Removing Millisecs from datetime
+    # df['updated_at'] = df['updated_at'].astype('datetime64[s]').astype('str')
+    # df['created_at'] = df['created_at'].astype('datetime64[s]').astype('str')
+    # df['obj_id'] = df['obj_id'].astype('str')
+    ## df.drop('_id', axis=1, inplace=True)
+
+    '''
+    df['debited_at'] = df.debited_at.astype(str).where(df.debited_at.notnull(), None)
+    df['booked_at'] = df.booked_at.astype(datetime).where(df.booked_at.notnull(), None)
+    df['booked_at'] = df.booked_at.where(df.booked_at.notnull(), None)
+    df['valid_from'] = df.valid_from.astype(str).where(df.valid_from.notnull(), None)
+    df['valid_upto'] = df.valid_upto.astype(str).where(df.valid_upto.notnull(), None)
+    '''
+
     df['debited_at'] = df.debited_at.astype("datetime64[s]").where(df.debited_at.notnull(), None)
     df['booked_at'] = df.booked_at.astype("datetime64[s]").where(df.booked_at.notnull(), None)
     df['valid_from'] = df.valid_from.astype("datetime64[s]").where(df.valid_from.notnull(), None)
     df['valid_upto'] = df.valid_upto.astype("datetime64[s]").where(df.valid_upto.notnull(), None)
-
-    df['tenure_months'] = df.tenure_months.astype("str").where(df.tenure_months.notnull(), None)
+    '''
+    df['debited_at'] = pd.to_datetime(df['debited_at'])
+    df['booked_at'] = pd.to_datetime(df['booked_at'])
+    df['valid_from'] = pd.to_datetime(df['valid_from'])
+    df['valid_upto'] = pd.to_datetime(df['valid_upto'])
+    '''
 
     return df
-
-
 # to_pandas(timestamp96=['inserted2'])
 
 
@@ -188,10 +207,10 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
             'booked_at': pd.Series(dtype='datetime64[ns]'),
             'status': pd.Series(dtype='str'),
             'sum_assured': pd.Series(dtype='str'),
-            'tenure_months': pd.Series(dtype='str'),
+            'tenure_months': pd.Series(dtype='int'),
             'policy_ref': pd.Series(dtype='str'),
             'customer_state': pd.Series(dtype='str'),
-            'customer_pincode': pd.Series(dtype='str'),
+            'customer_pincode': pd.Series(dtype='int'),
             'valid_from': pd.Series(dtype='datetime64[ns]'),
             'valid_upto': pd.Series(dtype='datetime64[ns]'),
             'debited_at': pd.Series(dtype='datetime64[ns]'),
@@ -206,13 +225,12 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
     elif load_type == 'CDC':
         # max_time = get_max_delta(landing_bucket, max_delta, target_db_name, tgt_table)
         ##max_time = datetime.now() - timedelta(days=10)  # TODO change this
-        max_time = datetime(2018, 4, 1)  # - timedelta(days=10)  # TODO change this
+        max_time = datetime(2023, 4, 1)  # - timedelta(days=10)  # TODO change this
         # If data has not been updated for long time, then take date till which data has been updated
-        # TODO MAx date from some metadata file...
         start_day = min(exec_day, max_time) - timedelta(days=5)
         start_day = exec_day - timedelta(days=10)
-        end_day = exec_day + timedelta(days=2)
-
+        end_day = exec_day  # max_time + timedelta(days=100)
+    #        end_day = max_time + timedelta(days=100)
 
     # TODO
 
