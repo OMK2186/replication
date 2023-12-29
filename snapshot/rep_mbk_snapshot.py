@@ -273,8 +273,8 @@ def dedupe_data(data, pk_list, audit_col):
 def reformat_source_data(src_data):
     try:
         logger.info('Reformatting of data started')
-        logger.info("Decimal cols {}".format(table_dict['decimal_cols']))
-        logger.info("Timestamp cols {}".format(table_dict['timestamp_cols']))
+        logger.info("Decimal cols: {}".format(table_dict['decimal_cols']))
+        logger.info("Timestamp cols: {}".format(table_dict['timestamp_cols']))
         
         if not src_data.rdd.isEmpty():
             delta_day = src_data
@@ -302,15 +302,16 @@ def reformat_source_data(src_data):
 def read_raw_data():
     logger.info("Glue job started, reading raw data from location: {}".format(source_path_dyf))
 
-    src_data = glueContext.create_dynamic_frame.from_options( \
+    raw_data = glueContext.create_dynamic_frame.from_options( \
                 connection_type="s3", \
                 connection_options=source_path_dyf, \
                 format="parquet" \
                 ).toDF()
 
-    if src_data.rdd.isEmpty():
+    if raw_data.rdd.isEmpty():
         logger.info("No data found for date {}, at location {}".format(today_partition, source_path_dyf))
         raise ("No data found for the date {}, at location {}".format(today_partition, source_path_dyf))
+    return raw_data
 
     
 
@@ -338,22 +339,7 @@ def start_job():
    
 
 
-
 start_job()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-sync_snapshot()
+#sync_snapshot()

@@ -245,7 +245,7 @@ def extract_data_task(task_name, params, pool):
 import yaml
 from copy import deepcopy
 
-with open('/apps/cron/aws_replication/metadata/mg_cross_sell_replication.yaml') as f:
+with open('/apps/cron/aws_replication/metadata/mg_kyc_replication.yaml') as f:
     configFile = yaml.safe_load(f)
     # TODO delete this
     print(configFile)

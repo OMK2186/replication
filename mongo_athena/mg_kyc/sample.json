@@ -1,0 +1,19 @@
+{ "_comment": "--# Collection: trackwizz_ckyc",
+  "_id": "64be150503e8112fb17c96e2",
+  "uuid": "601356c403beb",
+  "requestId": "5fe678a0ac140",
+  "encryptedPan": "Cadl9EAi0els9qQQvA/3cQ==",
+  "searchRequest": {
+    "InputIdType": "C",
+    "InputIdNo": "AZJPA4191N",
+    "RequestId": "99b88ad336db",
+    "ParentCompany": "SC144"
+  },
+  "downloadRequest": {
+    "RequestId": "601356c49f993",
+    "ParentCompany": "SC144",
+    "CKYCNumber": "60013050523574"
+  },
+  "createdAt": "2023-07-24T06:07:01.307Z",
+  "updatedAt": "2023-07-24T06:07:03.374Z"
+}

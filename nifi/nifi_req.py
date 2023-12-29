@@ -93,3 +93,35 @@ print(re)
 >>> print(re)
 {'componentState': {'componentId': 'b91fe430-0185-1000-3cbe-5a53bd215eac', 'stateDescription': 'Gives the option to store values not only on the FlowFile but as stateful variables to be referenced in a recursive manner.', 'localState': {'scope': 'LOCAL', 'totalEntryCount': 1, 'state': [{'key': 'last_tms', 'value': 'Mon Jan 16 11:28:06 IST 2023'}]}}}
 >>> 
+
+
+import requests
+url = 'http://localhost:8001/contentListener'
+data = {"username":"xyz","password":"xyz"}
+data={"trigger_id": "959cb132b17a_1", "mapping_id": 1, "nifi_conn_id": "mysql_an_250", "auto_incr_col": None, "audit_col_name": "updatedat", "max_audit_val": "2001-01-01", "nifi_target_bucket": "mbk-nifi-landingzone", "batch_size": 100000, "nifi_target_loc_prefix": "replication_v2/data", "entity_src_schema": "mobinew", "entity_src_name": "memberdetail", "entity_target_schema": "mobinew", "entity_target_name": "memberdetail","nifi_target_bucket":"mbk-nifi-landingzone","nifi_target_loc_prefix":"replication_v2/data"}
+
+requests.post(url, json=data)
+>>> requests.post(nifi_url, data=nifi_metadata_req_body)
+
+curl --request POST   --data '{"username":"xyz","password":"xyz"}'  http://localhost:8001/contentListener
+
+
+# NiFi bulletin
+
+## https://nifi.analytics.mbkinternal.in/nifi-api/flow/bulletin-board
+
+import requests
+import json
+
+bulletin_url="https://nifi.analytics.mbkinternal.in/nifi-api/flow/bulletin-board"
+requests.get(bulletin_url, headers=header, verify=False)
+
+pro_url="https://nifi.analytics.mbkinternal.in/nifi-api/processors/ad6ed226-018a-1000-7590-a2099ef21365"
+requests.get(pro_url, headers=header, verify=False)
+
+
+cont_url="https://nifi.analytics.mbkinternal.in/nifi-api/controller/process-groups/1f6ba7c1-018b-1000-5a57-2b1264b52061/status?recursive=true"
+cont_url="https://nifi.analytics.mbkinternal.in/nifi-api/controller/status"
+
+
+# SELECT coalesce(max(${audit_col_name}),${default_max_audit_val}) as new_audit_val from ${entity_src_schema}.${entity_src_name}

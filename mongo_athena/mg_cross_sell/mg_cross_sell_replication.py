@@ -141,18 +141,6 @@ def data_prep(df):
 
 def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
     # Need these columns, projection used for creating aliases
-    proj = {"$project": {
-        "obj_id": "$_id",
-        "member_id": "$memberId",
-        "insurance_category": "$insuranceCategory",
-        "insurance_sell_platform": "$insuranceSellPlatform",
-        "insurer": "$insurer",
-        "amount_paid": "$amountPaid",
-        "cross_sell": "$crossSell",
-        "booked_at": "$bookedAt",  ##**
-        "debited_at": "$debitedAt",
-        "created_at": "$createdAt",
-        "last_modified": "$lastModified"}}
 
     proj = {"$project": {
         "obj_id": "$_id",
@@ -176,8 +164,6 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
         "last_modified": "$lastModified"}}
     # Creating DF with prdefined column names to handle blank data
 
-    cols = ['obj_id', 'member_id', 'insurance_category', 'insurance_sell_platform', 'insurer', 'amount_paid',
-            'cross_sell', 'booked_at', 'debited_at', 'created_at', 'last_modified']
     cols = {'obj_id': pd.Series(dtype='str'),
             'member_id': pd.Series(dtype='str'),
             'insurance_category': pd.Series(dtype='str'),
@@ -213,8 +199,7 @@ def extract_policy_data(src_coll, load_type, audit_col, exec_day, s3_loc):
         start_day = exec_day - timedelta(days=10)
         end_day = exec_day + timedelta(days=2)
 
-
-    # TODO
+    #  TODO
 
     elif load_type == 'INCREMENTAL':
         print(f"Load type: {load_type}")
@@ -298,7 +283,71 @@ def extract_load_data(params, ds):
     # fetch_data(ex_query, src_table_name, columns, audit_col, max_time, ds)
 
 
-##Airflow Code
+# ####### [START] GLUE JOB Task CODE[START]
+
+'''
+{
+  "double_col_list": [
+    "amount_paid"
+  ],
+  "ts_col_list": [
+    "booked_at",
+    "valid_from",
+    "valid_upto",
+    "debited_at",
+    "created_at",
+    "last_modified"
+  ],
+  "landing_bucket": "mbk-nifi-landingzone",
+  "data_path": "data",
+  "target_bucket": "mbk-datalake-common-prod",
+  "target_db_name": "mg_cross_sell",
+  "target_table_name": "policy",
+  "p_key": "obj_id",
+  "audit_col": "last_modified",
+  "insert_type": "upsert",
+  "partition_src_col": "created_at",
+  "partition_col": "day"
+}
+'''
+def check_status(glue_client, job_name, run_id):
+    import time
+    while True:
+        status_response = glue_client.get_job_run(JobName=job_name, RunId=run_id)
+        run_status = status_response['JobRun']['JobRunState']
+        print(run_status)
+        time.sleep(5)
+
+        if run_status == 'FAILED':
+            print('Job Failed..:(')
+            break
+        if run_status == 'SUCCEEDED':
+            print('Job Successful..!!')
+            break
+    return run_status
+
+
+def trigger_glue_job(glue_client, job_name, glue_args):
+    #args = {'--type': '1', '--y_day': '20230401', '--d_day': day, '--table_metafile': metafile}
+    print(glue_args)
+    response = glue_client.start_job_run(JobName=job_name, Arguments=glue_args)
+    print(response)
+    log.info(response)
+    return response['JobRunId']
+
+
+def glue_job():
+    import boto3
+    glue_client = boto3.client('glue', region_name="ap-south-1")
+    # TODO job name to be passed from config..
+    job_name = 'mongo_athena_hudi_job'
+    run_id = trigger_glue_job(glue_client, job_name, glue_args)
+    check_status(job_name)
+
+
+# ########## [END] GLUE JOB CODE [END]
+
+# #Airflow Code
 
 args = {
     'owner': 'dataengg',
@@ -310,7 +359,7 @@ args = {
 }
 
 local_tz = pendulum.timezone("Asia/Kolkata")
-
+x
 dag = DAG(
     dag_id='mg_cross_sell_replication',
     default_args=args,
@@ -349,6 +398,7 @@ end = DummyOperator(
     dag=dag)
 
 
+
 def glue_job(params):
     print(params)
 
@@ -368,7 +418,7 @@ def extract_data_task(task_name, params, pool):
 import yaml
 from copy import deepcopy
 
-with open('/apps/cron/aws_replication/metadata/mg_cross_sell_replication.yaml') as f:
+with open('/apps/cron/aws_replication/metadata/mg_kyc_replication.yaml') as f:
     configFile = yaml.safe_load(f)
     # TODO delete this
     print(configFile)
@@ -428,3 +478,21 @@ with open('/apps/cron/aws_replication/metadata/mg_cross_sell_replication.yaml') 
 
 if __name__ == "__main__":
     dag.cli()
+'''
+>> nipyapi.canvas.get_root_pg_id()
+'0268583d-0178-1000-ba93-e6f3b6bc7497'
+>>>
+>>> import requests
+>>> url = 'http://localhost:8001/contentListener'
+>>> data = {"username":"xyz","password":"xyz"}
+>>> requests.post(url, json=data)
+<Response [200]>
+>>> data = {"username":"xyz","password":"xyz1"}
+>>> requests.post(url, json=data)
+<Response [200]>
+>>>
+>>>
+>>> requests.post(url, json=data)
+<Response [200]>
+
+'''

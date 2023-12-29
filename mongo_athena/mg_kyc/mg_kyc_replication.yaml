@@ -1,19 +1,18 @@
-mongo_host: "10.10.150.147"
+mongo_host: "10.10.150.82"
 mongo_port: 27017
-mongo_db: "cross-sell"
-mongo_user: "analytics-app"
-mongo_pass: "Analytics@890#31090"
+mongo_db: "kyc"
+mongo_user: "analytics"
+mongo_pass: "wrt@ysuioPs0l"
 
-##mongo --port 27017 -u analytics-app -p'Analytics@890#31090' --authenticationDatabase 'cross-sell' --host 10.10.150.147
+##mongo --port 27017 -u 'analytics' -p'wrt@ysuioPs0l'  --authenticationDatabase 'kyc'  --host 10.10.150.82
 
 #Load types - [CDC, FULL, INCREMENTAL, ADHOC]
 
 #audit_col is null in case of FULL load, in case of INCREMENTAL it will be created_at*, CDC->updated_at*
 #partition_col will be null if not partitioned, if there is created_at, it will date(created_at,'YYYYMMDD') format will be used
 
-dag: 'mg_cross-sell_replication'
+dag: 'mg_kyc_replication'
 
-#src_db_af_conn_id: 'pgsql_150.24_merchant'
 
 landing_bucket: 'mbk-nifi-landingzone' # Add this to particular table if you want to use diff landing_bucket for that table
 data_path: 'data' # In this table extracted data will be stored. Add this to particular table if you want to use diff data_path for that table.
@@ -28,24 +27,13 @@ target_bucket: 'mbk-datalake-common-prod'
 
 
 tables:
-    - mg_cross_sell_policy:
-        src_db_name: 'cross-sell'
-        src_table_name: 'policy'
+    - mg_kyc_trackwizz_ckyc:
+        src_db_name: 'kyc'
+        src_table_name: 'trackwizz_ckyc'
         load_type: 'CDC'
-        audit_col : 'lastModified'
-        target_db_name: 'mg_cross_sell'
-        target_table_name: 'policy'
+        audit_col : 'updatedAt'  #As in mongo collection
+        target_db_name: 'mg_kyc'
+        target_table_name: 'trackwizz_ckyc'
         primary_keys: 'obj_id' #Comma separated values
         partition_col: 'day'
-        partition_src_col: 'createdAt'
-    - mg_cross_sell_policy2:
-        src_db_name: 'cross-sell'
-        src_table_name: 'policy'
-        load_type: 'CDC'
-        audit_col : 'lastModified'
-        target_db_name: 'mg_cross_sell'
-        target_table_name: 'policy2'
-        primary_keys: 'obj_id' #Comma separated values
-        partition_col: 'day'
-        partition_src_col: 'createdAt'
-
+        partition_src_col: 'createdAt' #As in mongo collection

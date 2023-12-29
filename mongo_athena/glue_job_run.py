@@ -1,3 +1,9 @@
+import boto3
+import time
+from datetime import datetime, timedelta
+from pyathena import connect
+import pandas as pd
+
 
 s3_staging_dir = "s3://mbk-athena-temp/Unsaved/behml"
 region_name = "ap-south-1"
@@ -27,13 +33,15 @@ def check_status(job_name, run_id):
     status_response = glue_client.get_job_run(JobName=job_name, RunId=run_id)
     run_status=status_response['JobRun']['JobRunState']
     print(run_status)
-    time.sleep(5)
+    
     if run_status == 'FAILED':
       print('Job Failed..:(')
       break
     if run_status == 'SUCCEEDED':
       print('Job Successful..!!')
       break
+      
+    time.sleep(5)
   return run_status
 
 
